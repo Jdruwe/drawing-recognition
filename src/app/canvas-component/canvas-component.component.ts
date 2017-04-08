@@ -6,6 +6,7 @@ import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/switchMap';
+import {RecognizeService} from "../recognize.service";
 
 @Component({
   selector: 'canvas-component',
@@ -19,7 +20,15 @@ export class CanvasComponentComponent implements AfterViewInit {
   @Input() public width: number;
   @Input() public height: number;
 
+  public guesses: String[];
+
   private cx: CanvasRenderingContext2D;
+  private handwritingX = [];
+  private handwritingY = [];
+  private trace = [];
+
+  constructor(private recognizeService: RecognizeService) {
+  }
 
   ngAfterViewInit(): void {
 
@@ -55,6 +64,12 @@ export class CanvasComponentComponent implements AfterViewInit {
     canvasDown$
       .switchMap(event => canvasDrawing$)
       .subscribe((line: Line) => this.drawOnCanvas(line));
+
+    canvasReleased$
+      .subscribe(event => this.endDrawing());
+
+    canvasDown$
+      .subscribe(event => this.resetTemporaryCoordinates());
   }
 
   private drawOnCanvas(line: Line) {
@@ -67,5 +82,23 @@ export class CanvasComponentComponent implements AfterViewInit {
     this.cx.moveTo(line.x1, line.y1);
     this.cx.lineTo(line.x2, line.y2);
     this.cx.stroke();
+
+    this.handwritingX.push(line.x1, line.x2);
+    this.handwritingY.push(line.y1, line.y2);
+  }
+
+  private resetTemporaryCoordinates() {
+    this.handwritingX = [];
+    this.handwritingY = [];
+  }
+
+  private endDrawing() {
+    this.trace.push([this.handwritingX, this.handwritingY]);
+    this.recognizeService.getGuess(this.trace, this.width, this.height).subscribe(
+      (guesses: String[]) => this.guesses = guesses,
+      error => {
+        console.log(error);
+      }
+    );
   }
 }

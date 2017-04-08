@@ -1,10 +1,11 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {HttpModule} from '@angular/http';
 
-import { AppComponent } from './app.component';
-import { CanvasComponentComponent } from './canvas-component/canvas-component.component';
+import {AppComponent} from './app.component';
+import {CanvasComponentComponent} from './canvas-component/canvas-component.component';
+import {RecognizeService} from "./recognize.service";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { CanvasComponentComponent } from './canvas-component/canvas-component.co
     FormsModule,
     HttpModule
   ],
-  providers: [],
+  providers: [RecognizeService],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
