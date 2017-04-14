@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Http, Headers, RequestOptions} from "@angular/http";
 import {Observable} from "rxjs";
-import {ObservableInput} from "rxjs/Observable";
 
 @Injectable()
 export class RecognizeService {
@@ -9,7 +8,8 @@ export class RecognizeService {
   constructor(private http: Http) {
   }
 
-  private googleGuessUrl = 'https://www.google.com.tw/inputtools/request?itc=und-t-i0-handwrit&app=hwtcharpicker';
+  //private googleGuessUrl = 'https://www.google.com.tw/inputtools/request?itc=und-t-i0-handwrit&app=hwtcharpicker';
+  private googleGuessUrl = 'https://inputtools.google.com/request?ime=handwriting&app=quickdraw&dbg=1&cs=1&oe=UTF-8';
 
   getGuess(trace, canvasWidth: number, canvasHeight: number): Observable<String[]> {
 

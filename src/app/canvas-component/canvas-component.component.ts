@@ -5,7 +5,7 @@ import {Line} from "../line";
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/pairwise';
-import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/switchMapTo';
 import {RecognizeService} from "../recognize.service";
 
 @Component({
@@ -62,14 +62,12 @@ export class CanvasComponentComponent implements AfterViewInit {
       });
 
     canvasDown$
-      .switchMap(event => canvasDrawing$)
+      .do(event => this.resetTemporaryCoordinates())
+      .switchMapTo(canvasDrawing$)
       .subscribe((line: Line) => this.drawOnCanvas(line));
 
     canvasReleased$
       .subscribe(event => this.endDrawing());
-
-    canvasDown$
-      .subscribe(event => this.resetTemporaryCoordinates());
   }
 
   private drawOnCanvas(line: Line) {
