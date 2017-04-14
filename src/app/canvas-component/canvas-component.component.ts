@@ -62,7 +62,6 @@ export class CanvasComponentComponent implements AfterViewInit {
       });
 
     canvasDown$
-      .do(event => this.resetTemporaryCoordinates())
       .switchMapTo(canvasDrawing$)
       .subscribe((line: Line) => this.drawOnCanvas(line));
 
@@ -92,6 +91,7 @@ export class CanvasComponentComponent implements AfterViewInit {
 
   private endDrawing() {
     this.trace.push([this.handwritingX, this.handwritingY]);
+    this.resetTemporaryCoordinates();
     this.recognizeService.getGuess(this.trace, this.width, this.height).subscribe(
       (guesses: String[]) => this.guesses = guesses,
       error => {
