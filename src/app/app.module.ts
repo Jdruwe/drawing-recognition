@@ -3,19 +3,20 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {FlexLayoutModule} from '@angular/flex-layout';
 
 import 'hammerjs';
 
 import {AppComponent} from './app.component';
-import {CanvasComponentComponent} from './canvas-component/canvas-component.component';
 import {RecognizeService} from "./recognize.service";
 
-import {MdToolbarModule, MdIconModule} from '@angular/material';
+import {MdToolbarModule, MdIconModule, MdSnackBarModule} from '@angular/material';
+import {CanvasComponent} from './canvas/canvas.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CanvasComponentComponent
+    CanvasComponent
   ],
   imports: [
     BrowserModule,
@@ -23,7 +24,9 @@ import {MdToolbarModule, MdIconModule} from '@angular/material';
     HttpModule,
     BrowserAnimationsModule,
     MdToolbarModule,
-    MdIconModule
+    MdIconModule,
+    MdSnackBarModule,
+    FlexLayoutModule
   ],
   providers: [RecognizeService],
   bootstrap: [AppComponent]
