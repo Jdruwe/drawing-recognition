@@ -1,4 +1,4 @@
-import {Component, ViewChild, ElementRef, Input, AfterViewInit, NgZone} from '@angular/core';
+import {Component, ViewChild, ElementRef, Input, AfterViewInit, HostListener} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Line} from "../line";
 
@@ -27,30 +27,63 @@ export class CanvasComponent implements AfterViewInit {
   private trace = [];
   private canvasElement: HTMLCanvasElement;
   private boundingClientRect: ClientRect;
+  private isDrawing: boolean;
 
-  constructor(private recognizeService: RecognizeService, private ngZone: NgZone, private snackBar: MdSnackBar) {
-    window.onresize = () => {
-      this.ngZone.run(() => {
-        this.calculateCanvasOffset();
-      });
-    };
+  constructor(private recognizeService: RecognizeService, private snackBar: MdSnackBar) {
   }
 
   ngAfterViewInit(): void {
 
     this.canvasElement = this.canvas.nativeElement;
     this.cx = this.canvasElement.getContext('2d');
-
-    this.canvasElement.width = this.width;
-    this.canvasElement.height = this.height;
-
-    this.calculateCanvasOffset();
-
-    this.cx.lineWidth = 3;
-    this.cx.lineCap = 'round';
-    this.cx.strokeStyle = '#000';
-
+    this.initCanvas();
     this.captureEvents();
+  }
+
+  @HostListener('window:resize')
+  private onCanvasResize() {
+    this.initCanvas();
+  }
+
+  private initCanvas(): void {
+    this.isDrawing = false;
+    this.calculateCanvasDimensions();
+    this.calculateCanvasOffset();
+    this.setCanvasStyling();
+    this.displayStartText();
+  }
+
+  private clearCanvas(): void {
+    this.cx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+  }
+
+  private displayStartText(): void {
+    this.cx.textBaseline = "middle";
+    this.cx.textAlign = "center";
+    this.cx.font = 'bold 35px Arial';
+    this.cx.fillText('Start Drawing Here!', this.canvasElement.width / 2, this.canvasElement.height / 2);
+  }
+
+  private hideStartText(): void {
+    if (!this.isDrawing) {
+      this.clearCanvas();
+    }
+
+    this.isDrawing = true;
+  }
+
+  private setCanvasStyling(): void {
+    this.cx.lineWidth = 7;
+    this.cx.lineCap = 'round';
+    this.cx.lineJoin = 'round';
+    this.cx.strokeStyle = '#000';
+  }
+
+  private calculateCanvasDimensions(): void {
+    console.log('window width', window.innerWidth);
+    console.log('window width', window.innerHeight);
+    this.canvasElement.width = window.innerWidth;
+    this.canvasElement.height = window.innerHeight;
   }
 
   private calculateCanvasOffset(): void {
@@ -74,6 +107,7 @@ export class CanvasComponent implements AfterViewInit {
       });
 
     canvasDown$
+      .do(() => this.hideStartText())
       .switchMapTo(canvasDrawing$)
       .subscribe((line: Line) => this.drawOnCanvas(line));
 
