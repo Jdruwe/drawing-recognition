@@ -60,7 +60,7 @@ export class CanvasComponent implements AfterViewInit {
   private displayStartText(): void {
     this.cx.textBaseline = "middle";
     this.cx.textAlign = "center";
-    this.cx.font = 'bold 35px Arial';
+    this.cx.font = 'bold 25px Arial';
     this.cx.fillText('Start Drawing Here!', this.canvasElement.width / 2, this.canvasElement.height / 2);
   }
 
