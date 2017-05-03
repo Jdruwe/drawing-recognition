@@ -1,13 +1,15 @@
-import {Component, ViewChild, ElementRef, Input, AfterViewInit, HostListener} from '@angular/core';
+import {
+  Component, ViewChild, ElementRef, AfterViewInit, HostListener, Output, EventEmitter,
+  OnInit
+} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Line} from "../line";
+import {CanvasDimension} from "../canvas-dimension";
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/switchMapTo';
-import {RecognizeService} from "../recognize.service";
-import {MdSnackBar} from "@angular/material";
 
 @Component({
   selector: 'app-canvas',
@@ -17,23 +19,20 @@ import {MdSnackBar} from "@angular/material";
 export class CanvasComponent implements AfterViewInit {
 
   @ViewChild('canvas') public canvas: ElementRef;
-
-  @Input() public width: number;
-  @Input() public height: number;
+  @Output() onDrawing: EventEmitter<Line[]> = new EventEmitter();
+  @Output() onCanvasDimensionChanged: EventEmitter<CanvasDimension> = new EventEmitter();
 
   private cx: CanvasRenderingContext2D;
-  private handwritingX = [];
-  private handwritingY = [];
-  private trace = [];
+
+  private lines: Line[] = [];
   private canvasElement: HTMLCanvasElement;
   private boundingClientRect: ClientRect;
   private isDrawing: boolean;
 
-  constructor(private recognizeService: RecognizeService, private snackBar: MdSnackBar) {
+  constructor() {
   }
 
   ngAfterViewInit(): void {
-
     this.canvasElement = this.canvas.nativeElement;
     this.cx = this.canvasElement.getContext('2d');
     this.initCanvas();
@@ -80,10 +79,12 @@ export class CanvasComponent implements AfterViewInit {
   }
 
   private calculateCanvasDimensions(): void {
-    console.log('window width', window.innerWidth);
-    console.log('window width', window.innerHeight);
     this.canvasElement.width = window.innerWidth;
     this.canvasElement.height = window.innerHeight;
+    this.onCanvasDimensionChanged.emit({
+      width: window.innerWidth,
+      height: window.innerHeight
+    })
   }
 
   private calculateCanvasOffset(): void {
@@ -126,29 +127,10 @@ export class CanvasComponent implements AfterViewInit {
     this.cx.lineTo(line.x2 - this.boundingClientRect.left, line.y2 - this.boundingClientRect.top);
     this.cx.stroke();
 
-    this.handwritingX.push(line.x1 - this.boundingClientRect.left, line.x2 - this.boundingClientRect.left);
-    this.handwritingY.push(line.y1 - this.boundingClientRect.top, line.y2 - this.boundingClientRect.top);
-  }
-
-  private resetTemporaryCoordinates() {
-    this.handwritingX = [];
-    this.handwritingY = [];
+    this.lines.push(line);
   }
 
   private endDrawing() {
-    this.trace.push([this.handwritingX, this.handwritingY]);
-    this.resetTemporaryCoordinates();
-    this.recognizeService.getGuess(this.trace, this.width, this.height).subscribe(
-      (guess: String) => this.showGuess(guess),
-      error => {
-        console.log(error);
-      }
-    );
-  }
-
-  private showGuess(guess: String) {
-    this.snackBar.open('Google thinks you are drawing a ' + guess + "!", null, {
-      duration: 2000
-    });
+    this.onDrawing.emit(this.lines);
   }
 }

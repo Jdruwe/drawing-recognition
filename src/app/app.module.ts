@@ -12,11 +12,13 @@ import {RecognizeService} from "./recognize.service";
 
 import {MdToolbarModule, MdIconModule, MdSnackBarModule} from '@angular/material';
 import {CanvasComponent} from './canvas/canvas.component';
+import { GuessComponent } from './guess/guess.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CanvasComponent
+    CanvasComponent,
+    GuessComponent
   ],
   imports: [
     BrowserModule,
