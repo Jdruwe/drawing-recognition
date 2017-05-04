@@ -1,6 +1,5 @@
 import {
-  Component, ViewChild, ElementRef, AfterViewInit, HostListener, Output, EventEmitter,
-  OnInit
+  Component, ViewChild, ElementRef, AfterViewInit, HostListener, Output, EventEmitter
 } from '@angular/core';
 import {Observable} from 'rxjs';
 import {Line} from "../line";
@@ -10,6 +9,7 @@ import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/takeUntil';
 import 'rxjs/add/operator/pairwise';
 import 'rxjs/add/operator/switchMapTo';
+import {Point} from "../point";
 
 @Component({
   selector: 'app-canvas',
@@ -24,7 +24,7 @@ export class CanvasComponent implements AfterViewInit {
 
   private cx: CanvasRenderingContext2D;
 
-  private lines: Line[] = [];
+  private drawing: Line[] = [];
   private canvasElement: HTMLCanvasElement;
   private boundingClientRect: ClientRect;
   private isDrawing: boolean;
@@ -99,38 +99,38 @@ export class CanvasComponent implements AfterViewInit {
       .pairwise()
       .takeUntil(canvasReleased$)
       .map((event: [MouseEvent, MouseEvent]) => {
-        return {
-          x1: event[0].clientX,
-          y1: event[0].clientY,
-          x2: event[1].clientX,
-          y2: event[1].clientY,
-        }
+        return [
+          new Point(event[0].clientX, event[0].clientY),
+          new Point(event[1].clientX, event[1].clientY)
+        ]
       });
 
     canvasDown$
       .do(() => this.hideStartText())
+      .do(() => this.drawing.push(new Line()))
       .switchMapTo(canvasDrawing$)
-      .subscribe((line: Line) => this.drawOnCanvas(line));
+      .subscribe((points: Point[]) => this.drawOnCanvas(points));
 
     canvasReleased$
       .subscribe(event => this.endDrawing());
   }
 
-  private drawOnCanvas(line: Line) {
+  private drawOnCanvas(points: Point[]) {
 
     if (!this.cx) {
       return;
     }
 
     this.cx.beginPath();
-    this.cx.moveTo(line.x1 - this.boundingClientRect.left, line.y1 - this.boundingClientRect.top);
-    this.cx.lineTo(line.x2 - this.boundingClientRect.left, line.y2 - this.boundingClientRect.top);
+    this.cx.moveTo(points[0].x - this.boundingClientRect.left, points[0].y - this.boundingClientRect.top);
+    this.cx.lineTo(points[1].x - this.boundingClientRect.left, points[1].y - this.boundingClientRect.top);
     this.cx.stroke();
 
-    this.lines.push(line);
+    this.drawing[this.drawing.length - 1].points.push(points[0]);
+    this.drawing[this.drawing.length - 1].points.push(points[1]);
   }
 
   private endDrawing() {
-    this.onDrawing.emit(this.lines);
+    this.onDrawing.emit(this.drawing);
   }
 }

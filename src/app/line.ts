@@ -1,6 +1,14 @@
-export interface Line {
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number
+import {Point} from "./point";
+
+export class Line {
+
+  private _points: Point[];
+
+  constructor() {
+    this._points = [];
+  }
+
+  get points(): Point[] {
+    return this._points;
+  }
 }
