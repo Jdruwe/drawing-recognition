@@ -31,14 +31,14 @@ export class GuessComponent {
     }
 
     this.recognizeService.getGuess(trace, width, height).subscribe(
-      (guesses: string[]) => this.showGuess(guesses),
+      (guess: string) => this.showGuess(guess),
       error => {
         console.log(error);
       }
     );
   }
 
-  private showGuess(guess: String[]): void {
+  private showGuess(guess: String): void {
     this.snackBar.open('Google thinks you are drawing a ' + guess + "!", null, {
       duration: 2000
     });
